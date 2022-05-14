@@ -18,7 +18,7 @@ namespace Xamarin_Game
 
             X = (DisplayX - Width) / 2;
             Y = DisplayY - Height;
-
+            // (Metrics.WidthPixels / 1920f) - screen ration to make speed the same on all devices.
             Speed = (int)(6 * Metrics.WidthPixels / 1920f);
         }
 
