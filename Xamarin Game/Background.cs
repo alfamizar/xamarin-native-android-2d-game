@@ -12,10 +12,9 @@ using System.Text;
 
 namespace Xamarin_Game
 {
-    class Background:GameObject
+    class Background : GameObject
     {
- 
-        public Background(Context context):base(context)
+        public Background(Context context) : base(context)
         {
             Bitmap = BitmapFactory.DecodeResource(context.Resources, Resource.Drawable.forest);
             Width = Metrics.WidthPixels;
@@ -25,6 +24,5 @@ namespace Xamarin_Game
             X = 0;
             Y = 0;
         }
-
     }
 }

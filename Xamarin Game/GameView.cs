@@ -1,40 +1,40 @@
-﻿using Android.App;
-using Android.Content;
+﻿using Android.Content;
 using Android.Graphics;
-using Android.OS;
 using Android.Runtime;
 using Android.Views;
-using Android.Widget;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using Debug = System.Diagnostics.Debug;
 
 namespace Xamarin_Game
 {
     class GameView : SurfaceView, ISurfaceHolderCallback
     {
-        Context context;
-        Thread gameThread, renderThread, birdsGeneratorThread;
+        CancellationTokenSource cancellationTokenSource;
+        CancellationToken cancellationToken;
+
         ISurfaceHolder surfaceHolder;
+
         bool isRunning;
         int displayX, displayY;
         int score = 0;
-        Paint scorePaint = new Paint();
         float rX, rY;
+
+        Paint scorePaint = new Paint();
         Background background;
         Hero hero;
         List<Bird> birds = new List<Bird>();
         List<Stone> stones = new List<Stone>();
 
-        int BIRDS_MAX_COUNT = 4;
-
+        const int BIRDS_MAX_COUNT = 4;
 
         public GameView(Context context) : base(context)
         {
-
-            this.context = context;
+            cancellationTokenSource = new CancellationTokenSource();
+            cancellationToken = cancellationTokenSource.Token;
 
             var metrics = Resources.DisplayMetrics;
             displayX = metrics.WidthPixels;
@@ -57,16 +57,17 @@ namespace Xamarin_Game
             scorePaint.TextSize = 30;
             scorePaint.Color = Color.Red;
         }
-        override
-        public void Draw(Canvas canvas)
-        {
 
+        override public void Draw(Canvas canvas)
+        {
             canvas.DrawBitmap(background.Bitmap, background.X, background.Y, null);
+
             for (int i = 0; i < birds.Count; i++)
             {
                 Bird bird = birds.ElementAt(i);
                 canvas.DrawBitmap(bird.Bitmap, bird.X, bird.Y, null);
             }
+
             canvas.DrawBitmap(hero.Bitmap, hero.X, hero.Y, null);
 
             if (stones.Count > 0)
@@ -79,16 +80,17 @@ namespace Xamarin_Game
             }
 
             canvas.DrawText(score.ToString(), 5, 35, scorePaint);
-
         }
 
         public void Run()
         {
-            Canvas canvas = null;
+            Canvas canvas;
             while (isRunning)
             {
                 if (surfaceHolder.Surface.IsValid)
                 {
+                    Update();
+
                     canvas = surfaceHolder.LockCanvas();
                     Draw(canvas);
                     surfaceHolder.UnlockCanvasAndPost(canvas);
@@ -97,115 +99,61 @@ namespace Xamarin_Game
             }
         }
 
-
-
         public void Update()
         {
-            while (isRunning)
+            List<Bird> birdsToBeRemoved = new List<Bird>();
+            List<Stone> stonesToBeRemoved = new List<Stone>();
+            for (int i = 0; i < birds.Count; i++)
             {
-                List<Bird> birdsTrash = new List<Bird>();
-                List<Stone> stonesTrash = new List<Stone>();
-                for (int i = 0; i < birds.Count; i++)
-                {
-                    Bird bird = birds.ElementAt(i);
-                    bird.MoveObject();
-
-                    if (stones.Count > 0)
-                    {
-                        for (int j = 0; j < stones.Count; j++)
-                        {
-                            Stone stone = stones.ElementAt(j);
-                            if (Rect.Intersects(stone.GetColisionShape(), bird.GetColisionShape()))
-                            {
-                                Console.WriteLine("Intersected");
-                                score++;
-                                birdsTrash.Add(bird);
-                                stonesTrash.Add(stone);
-                            }
-                        }
-                    }
-                }
-
-                hero.MoveObject();
+                Bird bird = birds.ElementAt(i);
+                bird.MoveObject();
 
                 if (stones.Count > 0)
                 {
-                    for (int i = 0; i < stones.Count; i++)
+                    for (int j = 0; j < stones.Count; j++)
                     {
-                        Stone stone = stones.ElementAt(i);
-                        stone.MoveObject();
-                        if (stone.Y + Height < 0)
+                        Stone stone = stones.ElementAt(j);
+                        if (Rect.Intersects(stone.GetColisionShape(), bird.GetColisionShape()))
                         {
-                            stonesTrash.Add(stone);
+                            Debug.WriteLine("Intersected");
+                            score++;
+                            birdsToBeRemoved.Add(bird);
+                            stonesToBeRemoved.Add(stone);
                         }
                     }
                 }
-                for (int i = 0; i < birdsTrash.Count; i++)
+            }
+
+            hero.MoveObject();
+
+            if (stones.Count > 0)
+            {
+                for (int i = 0; i < stones.Count; i++)
                 {
-                    if (birds.Count > 0)
+                    Stone stone = stones.ElementAt(i);
+                    stone.MoveObject();
+                    if (stone.Y + Height < 0)
                     {
-                        birds.Remove(birdsTrash.ElementAt(i));
+                        stonesToBeRemoved.Add(stone);
                     }
                 }
-
-                for (int i = 0; i < stonesTrash.Count; i++)
-                {
-                    if (stones.Count > 0)
-                    {
-                        stones.Remove(stonesTrash.ElementAt(i));
-                    }
-                }
-                Thread.Sleep(17);
             }
-        }
 
-        public void SurfaceChanged(ISurfaceHolder holder, [GeneratedEnum] Format format, int width, int height)
-        {
-
-        }
-
-        public void SurfaceCreated(ISurfaceHolder holder)
-        {
-            Resume();
-        }
-
-        public void SurfaceDestroyed(ISurfaceHolder holder)
-        {
-            Pause();
-        }
-
-
-        public override bool OnTouchEvent(MotionEvent e)
-        {
-            if (e.ActionMasked == MotionEventActions.Down)
+            for (int i = 0; i < birdsToBeRemoved.Count; i++)
             {
-                Console.WriteLine("Action Down");
-                if (e.GetX() > 0 & e.GetX() < displayX / 3)
+                if (birds.Count > 0)
                 {
-                    Console.WriteLine("Action Down Left 1/3 Screen");
-                    hero.IsMoveLeft = true;
-                    hero.IsMoveRight = false;
+                    birds.Remove(birdsToBeRemoved.ElementAt(i));
                 }
-                else if (e.GetX() > (displayX / 3 * 2) & e.GetX() < displayX)
-                {
-                    Console.WriteLine("Action Down Right 1/3 Screen");
-                    hero.IsMoveLeft = false;
-                    hero.IsMoveRight = true;
-                }
-                else
-                {
-                    Stone stone = new Stone(context, hero);
-                    stones.Add(stone);
-                }
-            }
-            else if (e.ActionMasked == MotionEventActions.Up)
-            {
-                Console.WriteLine("Action Up");
-                hero.IsMoveLeft = false;
-                hero.IsMoveRight = false;
             }
 
-            return true;
+            for (int i = 0; i < stonesToBeRemoved.Count; i++)
+            {
+                if (stones.Count > 0)
+                {
+                    stones.Remove(stonesToBeRemoved.ElementAt(i));
+                }
+            }
         }
 
         private void GenerateBirds()
@@ -214,43 +162,78 @@ namespace Xamarin_Game
             {
                 if (birds.Count < BIRDS_MAX_COUNT)
                 {
-                    birds.Add(new Bird(context, new Random().Next(0, 4)));
+                    birds.Add(new Bird(Context, new Random().Next(0, 4)));
                 }
                 Thread.Sleep(2500);
             }
+        }
+
+        public override bool OnTouchEvent(MotionEvent e)
+        {
+            if (e.ActionMasked == MotionEventActions.Down)
+            {
+                Debug.WriteLine("Action Down");
+                if (e.GetX() > 0 & e.GetX() < displayX / 3)
+                {
+                    Debug.WriteLine("Action Down Left 1/3 Screen");
+                    hero.IsMoveLeft = true;
+                    hero.IsMoveRight = false;
+                }
+                else if (e.GetX() > (displayX / 3 * 2) & e.GetX() < displayX)
+                {
+                    Debug.WriteLine("Action Down Right 1/3 Screen");
+                    hero.IsMoveLeft = false;
+                    hero.IsMoveRight = true;
+                }
+                else
+                {
+                    Stone stone = new Stone(Context, hero);
+                    stones.Add(stone);
+                }
+            }
+            else if (e.ActionMasked == MotionEventActions.Up)
+            {
+                Debug.WriteLine("Action Up");
+                hero.IsMoveLeft = false;
+                hero.IsMoveRight = false;
+            }
+            return true;
         }
 
         public void Resume()
         {
             isRunning = true;
 
-            gameThread = new Thread(new ThreadStart(Update));
-            renderThread = new Thread(new ThreadStart(Run));
-            birdsGeneratorThread = new Thread(new ThreadStart(GenerateBirds));
+            Task gameLoopTask = Task.Run(() =>
+            {
+                Run();
+            }, cancellationToken);
 
-            gameThread.Start();
-            renderThread.Start();
-            birdsGeneratorThread.Start();
+            Task birdsGenerationTask = Task.Run(() =>
+            {
+                GenerateBirds();
+            }, cancellationToken);
         }
 
         public void Pause()
         {
-            bool retry = true;
-            while (retry)
-            {
-                try
-                {
-                    isRunning = false;
-                    gameThread.Join();
-                    renderThread.Join();
-                    birdsGeneratorThread.Join();
-                    retry = false;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-            }
+            isRunning = false;
+        }
+
+
+        public void SurfaceChanged(ISurfaceHolder holder, [GeneratedEnum] Format format, int width, int height)
+        {
+
+        }
+
+        public void SurfaceCreated(ISurfaceHolder holder)
+        {
+
+        }
+
+        public void SurfaceDestroyed(ISurfaceHolder holder)
+        {
+            Pause();
         }
     }
 }

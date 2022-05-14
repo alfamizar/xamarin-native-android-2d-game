@@ -2,23 +2,22 @@
 using Android.OS;
 using Android.Support.V7.App;
 using Android.Runtime;
-using Android.Widget;
+using Xamarin.Forms.Platform.Android;
 
 namespace Xamarin_Game
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true, ScreenOrientation = Android.Content.PM.ScreenOrientation.Landscape)]
-    public class MainActivity : AppCompatActivity
+    public class MainActivity : FormsAppCompatActivity
     {
-
         GameView gameView;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+
             // Set our view from the "main" layout resource
 
-            this.Window.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
-
+            Window.AddFlags(Android.Views.WindowManagerFlags.Fullscreen);
 
             gameView = new GameView(this);
 
@@ -42,6 +41,7 @@ namespace Xamarin_Game
                 gameView.Pause();
             }
         }
+
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
