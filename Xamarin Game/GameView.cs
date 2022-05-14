@@ -4,6 +4,7 @@ using Android.Runtime;
 using Android.Views;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,44 +59,40 @@ namespace Xamarin_Game
             scorePaint.Color = Color.Red;
         }
 
-        override public void Draw(Canvas canvas)
-        {
-            canvas.DrawBitmap(background.Bitmap, background.X, background.Y, null);
-
-            for (int i = 0; i < birds.Count; i++)
-            {
-                Bird bird = birds.ElementAt(i);
-                canvas.DrawBitmap(bird.Bitmap, bird.X, bird.Y, null);
-            }
-
-            canvas.DrawBitmap(hero.Bitmap, hero.X, hero.Y, null);
-
-            if (stones.Count > 0)
-            {
-                for (int i = 0; i < stones.Count; i++)
-                {
-                    Stone stone = stones.ElementAt(i);
-                    canvas.DrawBitmap(stone.Bitmap, stone.X, stone.Y, null);
-                }
-            }
-
-            canvas.DrawText(score.ToString(), 5, 35, scorePaint);
-        }
-
         public void Run()
         {
-            Canvas canvas;
-            while (isRunning)
+            /*            Stopwatch stopWatch = new Stopwatch();
+
+                        while (isRunning)
+                        {
+                            stopWatch.Reset();
+                            stopWatch.Start();
+                            Update();
+                            Render();
+                            stopWatch.Stop();
+                            Debug.WriteLine(stopWatch.ElapsedMilliseconds);
+                            if (stopWatch.ElapsedMilliseconds < 17)
+                                Thread.Sleep((int)(17 - stopWatch.ElapsedMilliseconds));
+                        }*/
+            double MS_PER_UPDATE = 10;
+            double previous = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            double lag = 0.0;
+
+            while (true)
             {
-                if (surfaceHolder.Surface.IsValid)
+                double current = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                double elapsed = current - previous;
+                previous = current;
+                lag += elapsed;
+                //processInput();
+                while (lag >= MS_PER_UPDATE)
                 {
                     Update();
-
-                    canvas = surfaceHolder.LockCanvas();
-                    Draw(canvas);
-                    surfaceHolder.UnlockCanvasAndPost(canvas);
+                    lag -= MS_PER_UPDATE;
                 }
-                Thread.Sleep(17);
+
+                //Render(lag / MS_PER_UPDATE);
+                Render();
             }
         }
 
@@ -103,6 +100,7 @@ namespace Xamarin_Game
         {
             List<Bird> birdsToBeRemoved = new List<Bird>();
             List<Stone> stonesToBeRemoved = new List<Stone>();
+
             for (int i = 0; i < birds.Count; i++)
             {
                 Bird bird = birds.ElementAt(i);
@@ -154,6 +152,39 @@ namespace Xamarin_Game
                     stones.Remove(stonesToBeRemoved.ElementAt(i));
                 }
             }
+        }
+
+        private void Render(double interpolate = 1)
+        {
+            if (!surfaceHolder.Surface.IsValid)
+            {
+                return;
+            }
+
+            Canvas canvas = surfaceHolder.LockCanvas();
+
+            canvas.DrawBitmap(background.Bitmap, background.X, background.Y, null);
+
+            for (int i = 0; i < birds.Count; i++)
+            {
+                Bird bird = birds.ElementAt(i);
+                canvas.DrawBitmap(bird.Bitmap, (float)(bird.X * interpolate), bird.Y, null);
+            }
+
+            canvas.DrawBitmap(hero.Bitmap, (float)(hero.X * interpolate), hero.Y, null);
+
+            if (stones.Count > 0)
+            {
+                for (int i = 0; i < stones.Count; i++)
+                {
+                    Stone stone = stones.ElementAt(i);
+                    canvas.DrawBitmap(stone.Bitmap, (float)(stone.X * interpolate), stone.Y, null);
+                }
+            }
+
+            canvas.DrawText(score.ToString(), 5, 35, scorePaint);
+
+            surfaceHolder.UnlockCanvasAndPost(canvas);
         }
 
         private void GenerateBirds()

@@ -24,7 +24,7 @@ namespace Xamarin_Game
 
         public override void MoveObject()
         {
-            Debug.WriteLine("Hero Moved");
+            //Debug.WriteLine("Hero Moved");
             if (isMoveLeft & !isMoveRight)
             {
                 Debug.WriteLine("Hero Moved left");
