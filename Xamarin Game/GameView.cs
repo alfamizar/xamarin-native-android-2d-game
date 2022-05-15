@@ -4,6 +4,7 @@ using Android.Runtime;
 using Android.Views;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,6 +64,8 @@ namespace Xamarin_Game
             double previous = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             double lag = 0.0;
 
+            Stopwatch stopwatch = new Stopwatch();
+
             while (isRunning)
             {
                 double current = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -70,17 +73,29 @@ namespace Xamarin_Game
                 previous = current;
                 lag += elapsed;
                 //ProcessInput();
+                int updatesPerRender = 0;
                 while (lag >= MS_PER_UPDATE)
                 {
+                    stopwatch.Reset();
+                    stopwatch.Start();
                     Update();
+                    stopwatch.Stop();
+                    Debug.WriteLine($"Update time is {stopwatch.ElapsedMilliseconds} mills");
                     lag -= MS_PER_UPDATE;
+                    updatesPerRender++;
                 }
+                Debug.WriteLine($"Updates per render: {updatesPerRender}");
+                stopwatch.Reset();
+                stopwatch.Start();
                 Render(lag / MS_PER_UPDATE);
+                stopwatch.Stop();
+                Debug.WriteLine($"Render time is {stopwatch.ElapsedMilliseconds} mills");
             }
         }
 
         public void Update()
         {
+            //Thread.Sleep(5);
             List<Bird> birdsToBeRemoved = new List<Bird>();
             List<Stone> stonesToBeRemoved = new List<Stone>();
 
@@ -139,7 +154,11 @@ namespace Xamarin_Game
 
         private void Render(double interpolate = 1)
         {
-            if (!surfaceHolder.Surface.IsValid) return;
+            if (!surfaceHolder.Surface.IsValid)
+            {
+                Debug.WriteLine("SurfaceHolderIsInvalid");
+                return;
+            }
 
             Canvas canvas;
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
