@@ -4,9 +4,9 @@ using System;
 
 namespace Xamarin_Game
 {
-    class Bird : GameObject
+    internal class Bird : GameObject
     {
-        int[] ducksId = { Resource.Drawable.duck0, Resource.Drawable.duck1, Resource.Drawable.duck2, Resource.Drawable.duck3 };
+        private int[] ducksId = { Resource.Drawable.duck0, Resource.Drawable.duck1, Resource.Drawable.duck2, Resource.Drawable.duck3 };
 
         public Bird(Context context, int i) : base(context)
         {
@@ -21,10 +21,10 @@ namespace Xamarin_Game
             X = random.Next(0, DisplayX - Width);
             Y = i * Height;
 
-            Speed = -(int)(random.Next(4, 12) * Metrics.WidthPixels / 1920f);
+            Speed = -(int)(random.Next(4, 12) * DisplayWidthSizeEqualizer);
         }
 
-        override public void MoveObject()
+        public override void MoveObject()
         {
             X += Speed;
 

@@ -4,10 +4,10 @@ using Debug = System.Diagnostics.Debug;
 
 namespace Xamarin_Game
 {
-    class Hero : GameObject
+    internal class Hero : GameObject
     {
-        bool isMoveLeft;
-        bool isMoveRight;
+        private bool isMoveLeft;
+        private bool isMoveRight;
 
         public Hero(Context context) : base(context)
         {
@@ -19,7 +19,7 @@ namespace Xamarin_Game
             X = (DisplayX - Width) / 2;
             Y = DisplayY - Height;
             // (Metrics.WidthPixels / 1920f) - screen ration to make speed the same on all devices.
-            Speed = (int)(6 * Metrics.WidthPixels / 1920f);
+            Speed = (int)(6 * DisplayWidthSizeEqualizer);
         }
 
         public override void MoveObject()

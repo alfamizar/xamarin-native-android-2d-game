@@ -3,7 +3,7 @@ using Android.Graphics;
 
 namespace Xamarin_Game
 {
-    class Stone : GameObject
+    internal class Stone : GameObject
     {
         public Stone(Context context, Hero hero) : base(context)
         {
@@ -15,7 +15,7 @@ namespace Xamarin_Game
             X = (hero.X + ((hero.Width - Width) / 2));
             Y = hero.Y - Height;
 
-            Speed = (int)(12 * Metrics.WidthPixels / 1920f);
+            Speed = (int)(12 * DisplayHeightSizeEqualizer);
         }
 
         public override void MoveObject()

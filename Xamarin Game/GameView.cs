@@ -11,25 +11,24 @@ using Debug = System.Diagnostics.Debug;
 
 namespace Xamarin_Game
 {
-    class GameView : SurfaceView, ISurfaceHolderCallback
+    internal class GameView : SurfaceView, ISurfaceHolderCallback
     {
-        CancellationTokenSource cancellationTokenSource;
-        CancellationToken cancellationToken;
+        private CancellationTokenSource cancellationTokenSource;
+        private CancellationToken cancellationToken;
 
-        ISurfaceHolder surfaceHolder;
+        private ISurfaceHolder surfaceHolder;
 
-        bool isRunning;
-        int displayX, displayY;
-        int score = 0;
-        //float rX, rY;
+        private bool isRunning;
+        private int displayX, displayY;
+        private int score = 0;
 
-        Paint scorePaint = new Paint();
-        Background background;
-        Hero hero;
-        List<Bird> birds = new List<Bird>();
-        List<Stone> stones = new List<Stone>();
+        private Paint scorePaint = new Paint();
+        private Background background;
+        private Hero hero;
+        private List<Bird> birds = new List<Bird>();
+        private List<Stone> stones = new List<Stone>();
 
-        const int BIRDS_MAX_COUNT = 4;
+        private const int BIRDS_MAX_COUNT = 4;
 
         public GameView(Context context) : base(context)
         {
@@ -39,8 +38,6 @@ namespace Xamarin_Game
             var metrics = Resources.DisplayMetrics;
             displayX = metrics.WidthPixels;
             displayY = metrics.HeightPixels;
-            /*rX = displayX / 1920f;
-            rY = displayY / 1080f;*/
 
             surfaceHolder = Holder;
             surfaceHolder.AddCallback(this);
@@ -97,8 +94,7 @@ namespace Xamarin_Game
 
         public void Update()
         {
-            //Thread.Sleep(34);
-            List <Bird> birdsToBeRemoved = new List<Bird>();
+            List<Bird> birdsToBeRemoved = new List<Bird>();
             List<Stone> stonesToBeRemoved = new List<Stone>();
 
             for (int i = 0; i < birds.Count; i++)
@@ -156,10 +152,7 @@ namespace Xamarin_Game
 
         private void Render(double interpolate = 1)
         {
-            if (!surfaceHolder.Surface.IsValid)
-            {
-                return;
-            }
+            if (!surfaceHolder.Surface.IsValid) return;
 
             Canvas canvas = surfaceHolder.LockCanvas();
 
@@ -235,7 +228,7 @@ namespace Xamarin_Game
         {
             isRunning = true;
             Task gameLoopTask = Task.Run(() =>
-            {                
+            {
                 Run();
             }, cancellationToken);
 
@@ -250,20 +243,13 @@ namespace Xamarin_Game
             isRunning = false;
         }
 
-
         public void SurfaceChanged(ISurfaceHolder holder, [GeneratedEnum] Format format, int width, int height)
-        {
-
-        }
+        { }
 
         public void SurfaceCreated(ISurfaceHolder holder)
-        {
-
-        }
+        { }
 
         public void SurfaceDestroyed(ISurfaceHolder holder)
-        {
-            Pause();
-        }
+        { Pause(); }
     }
 }
