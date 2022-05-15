@@ -141,8 +141,15 @@ namespace Xamarin_Game
         {
             if (!surfaceHolder.Surface.IsValid) return;
 
-            Canvas canvas = surfaceHolder.LockCanvas();
-
+            Canvas canvas;
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            {
+                canvas = surfaceHolder.LockHardwareCanvas();
+            }
+            else
+            {
+                canvas = surfaceHolder.LockCanvas();
+            }
             canvas.DrawBitmap(background.Bitmap, background.X, background.Y, null);
 
             for (int i = 0; i < birds.Count; i++)
