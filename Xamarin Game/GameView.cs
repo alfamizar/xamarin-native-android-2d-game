@@ -57,20 +57,9 @@ namespace Xamarin_Game
 
         public void Run()
         {
-            /*            Stopwatch stopWatch = new Stopwatch();
-
-                        while (isRunning)
-                        {
-                            stopWatch.Reset();
-                            stopWatch.Start();
-                            Update();
-                            Render();
-                            stopWatch.Stop();
-                            Debug.WriteLine(stopWatch.ElapsedMilliseconds);
-                            if (stopWatch.ElapsedMilliseconds < 17)
-                                Thread.Sleep((int)(17 - stopWatch.ElapsedMilliseconds));
-                        }*/
-            double MS_PER_UPDATE = 10;
+            const double oneSecondInMills = 1000.0;
+            const int targetFps = 120;
+            const double MS_PER_UPDATE = oneSecondInMills / targetFps;
             double previous = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             double lag = 0.0;
 
@@ -80,15 +69,13 @@ namespace Xamarin_Game
                 double elapsed = current - previous;
                 previous = current;
                 lag += elapsed;
-                //processInput();
+                //ProcessInput();
                 while (lag >= MS_PER_UPDATE)
                 {
                     Update();
                     lag -= MS_PER_UPDATE;
                 }
-
-                //Render(lag / MS_PER_UPDATE);
-                Render();
+                Render(lag / MS_PER_UPDATE);
             }
         }
 
@@ -161,17 +148,19 @@ namespace Xamarin_Game
             for (int i = 0; i < birds.Count; i++)
             {
                 Bird bird = birds.ElementAt(i);
-                canvas.DrawBitmap(bird.Bitmap, (float)(bird.X * interpolate), bird.Y, null);
+                canvas.DrawBitmap(bird.Bitmap, (float)(bird.X), bird.Y, null);
             }
 
-            canvas.DrawBitmap(hero.Bitmap, (float)(hero.X * interpolate), hero.Y, null);
+            canvas.DrawBitmap(hero.Bitmap, (float)(hero.X), hero.Y, null);
 
             if (stones.Count > 0)
             {
                 for (int i = 0; i < stones.Count; i++)
                 {
                     Stone stone = stones.ElementAt(i);
-                    canvas.DrawBitmap(stone.Bitmap, (float)(stone.X * interpolate), stone.Y, null);
+                    // Interpolate is used to render object at place where player expects to see object, 
+                    // but not, where the object actually is!
+                    canvas.DrawBitmap(stone.Bitmap, (float)(stone.X), (float)(stone.Y - (stone.Speed * interpolate)), null);
                 }
             }
 
