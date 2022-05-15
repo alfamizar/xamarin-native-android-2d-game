@@ -28,8 +28,11 @@ namespace Xamarin_Game
         private Hero hero;
         private List<Bird> birds = new List<Bird>();
         private List<Stone> stones = new List<Stone>();
+        private readonly float screenRefrashRate;
+        private readonly float refreshRateObjectsSpeedRatio;
 
-        private const int BIRDS_MAX_COUNT = 4;
+        private const int BirdsMaxCount = 4;
+        private const int DefaultTargetFPS = 60;
 
         public GameView(Context context) : base(context)
         {
@@ -45,7 +48,7 @@ namespace Xamarin_Game
 
             background = new Background(context);
 
-            for (int i = 0; i < BIRDS_MAX_COUNT; i++)
+            for (int i = 0; i < BirdsMaxCount; i++)
             {
                 birds.Add(new Bird(context, i));
             }
@@ -54,6 +57,10 @@ namespace Xamarin_Game
 
             scorePaint.TextSize = 30;
             scorePaint.Color = Color.Red;
+
+            screenRefrashRate = ((MainActivity)context).WindowManager.DefaultDisplay.RefreshRate;
+            Debug.WriteLine(screenRefrashRate);
+            refreshRateObjectsSpeedRatio = DefaultTargetFPS / screenRefrashRate;
         }
 
         public void Run()
@@ -199,7 +206,7 @@ namespace Xamarin_Game
         {
             while (isRunning)
             {
-                if (birds.Count < BIRDS_MAX_COUNT)
+                if (birds.Count < BirdsMaxCount)
                 {
                     birds.Add(new Bird(Context, new Random().Next(0, 4)));
                 }
