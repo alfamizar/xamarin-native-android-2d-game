@@ -21,7 +21,6 @@ namespace Xamarin_Game
         bool isRunning;
         int displayX, displayY;
         int score = 0;
-        //float rX, rY;
 
         Paint scorePaint = new Paint();
         Background background;
@@ -39,8 +38,6 @@ namespace Xamarin_Game
             var metrics = Resources.DisplayMetrics;
             displayX = metrics.WidthPixels;
             displayY = metrics.HeightPixels;
-            /*rX = displayX / 1920f;
-            rY = displayY / 1080f;*/
 
             surfaceHolder = Holder;
             surfaceHolder.AddCallback(this);
@@ -97,8 +94,7 @@ namespace Xamarin_Game
 
         public void Update()
         {
-            //Thread.Sleep(34);
-            List <Bird> birdsToBeRemoved = new List<Bird>();
+            List<Bird> birdsToBeRemoved = new List<Bird>();
             List<Stone> stonesToBeRemoved = new List<Stone>();
 
             for (int i = 0; i < birds.Count; i++)
@@ -156,10 +152,7 @@ namespace Xamarin_Game
 
         private void Render(double interpolate = 1)
         {
-            if (!surfaceHolder.Surface.IsValid)
-            {
-                return;
-            }
+            if (!surfaceHolder.Surface.IsValid) return;
 
             Canvas canvas = surfaceHolder.LockCanvas();
 
@@ -235,7 +228,7 @@ namespace Xamarin_Game
         {
             isRunning = true;
             Task gameLoopTask = Task.Run(() =>
-            {                
+            {
                 Run();
             }, cancellationToken);
 
@@ -251,19 +244,10 @@ namespace Xamarin_Game
         }
 
 
-        public void SurfaceChanged(ISurfaceHolder holder, [GeneratedEnum] Format format, int width, int height)
-        {
+        public void SurfaceChanged(ISurfaceHolder holder, [GeneratedEnum] Format format, int width, int height) { }
 
-        }
+        public void SurfaceCreated(ISurfaceHolder holder) { }
 
-        public void SurfaceCreated(ISurfaceHolder holder)
-        {
-
-        }
-
-        public void SurfaceDestroyed(ISurfaceHolder holder)
-        {
-            Pause();
-        }
+        public void SurfaceDestroyed(ISurfaceHolder holder) { Pause(); }
     }
 }

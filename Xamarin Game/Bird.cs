@@ -21,7 +21,7 @@ namespace Xamarin_Game
             X = random.Next(0, DisplayX - Width);
             Y = i * Height;
 
-            Speed = -(int)(random.Next(4, 12) * Metrics.WidthPixels / 1920f);
+            Speed = -(int)(random.Next(4, 12) * DisplayWidthSizeEqualizer);
         }
 
         override public void MoveObject()

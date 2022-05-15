@@ -1,6 +1,5 @@
 ﻿using Android.App;
 using Android.OS;
-using Android.Support.V7.App;
 using Android.Runtime;
 using Xamarin.Forms.Platform.Android;
 
