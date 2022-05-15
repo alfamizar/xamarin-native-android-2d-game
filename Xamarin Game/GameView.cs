@@ -78,7 +78,7 @@ namespace Xamarin_Game
             double previous = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             double lag = 0.0;
 
-            while (true)
+            while (isRunning)
             {
                 double current = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 double elapsed = current - previous;
@@ -98,7 +98,8 @@ namespace Xamarin_Game
 
         public void Update()
         {
-            List<Bird> birdsToBeRemoved = new List<Bird>();
+            //Thread.Sleep(34);
+            List <Bird> birdsToBeRemoved = new List<Bird>();
             List<Stone> stonesToBeRemoved = new List<Stone>();
 
             for (int i = 0; i < birds.Count; i++)
@@ -234,9 +235,8 @@ namespace Xamarin_Game
         public void Resume()
         {
             isRunning = true;
-
             Task gameLoopTask = Task.Run(() =>
-            {
+            {                
                 Run();
             }, cancellationToken);
 
