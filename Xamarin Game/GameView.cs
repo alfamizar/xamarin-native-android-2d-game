@@ -4,7 +4,6 @@ using Android.Runtime;
 using Android.Views;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +21,7 @@ namespace Xamarin_Game
         bool isRunning;
         int displayX, displayY;
         int score = 0;
-        float rX, rY;
+        //float rX, rY;
 
         Paint scorePaint = new Paint();
         Background background;
@@ -40,8 +39,8 @@ namespace Xamarin_Game
             var metrics = Resources.DisplayMetrics;
             displayX = metrics.WidthPixels;
             displayY = metrics.HeightPixels;
-            rX = displayX / 1920f;
-            rY = displayY / 1080f;
+            /*rX = displayX / 1920f;
+            rY = displayY / 1080f;*/
 
             surfaceHolder = Holder;
             surfaceHolder.AddCallback(this);
@@ -78,7 +77,7 @@ namespace Xamarin_Game
             double previous = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             double lag = 0.0;
 
-            while (true)
+            while (isRunning)
             {
                 double current = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 double elapsed = current - previous;
@@ -98,7 +97,8 @@ namespace Xamarin_Game
 
         public void Update()
         {
-            List<Bird> birdsToBeRemoved = new List<Bird>();
+            //Thread.Sleep(34);
+            List <Bird> birdsToBeRemoved = new List<Bird>();
             List<Stone> stonesToBeRemoved = new List<Stone>();
 
             for (int i = 0; i < birds.Count; i++)
@@ -234,9 +234,8 @@ namespace Xamarin_Game
         public void Resume()
         {
             isRunning = true;
-
             Task gameLoopTask = Task.Run(() =>
-            {
+            {                
                 Run();
             }, cancellationToken);
 
