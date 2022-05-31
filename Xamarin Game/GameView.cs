@@ -4,11 +4,9 @@ using Android.Runtime;
 using Android.Views;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Debug = System.Diagnostics.Debug;
 
 namespace Xamarin_Game
 {
@@ -32,7 +30,7 @@ namespace Xamarin_Game
         private readonly float refreshRateObjectsSpeedRatio;
 
         private const int BirdsMaxCount = 4;
-        private const int DefaultTargetFPS = 60;
+        private const int DefaultTargetFPS = 120;
 
         public GameView(Context context) : base(context)
         {
@@ -59,19 +57,15 @@ namespace Xamarin_Game
             scorePaint.Color = Color.Red;
 
             screenRefrashRate = ((MainActivity)context).WindowManager.DefaultDisplay.RefreshRate;
-            Debug.WriteLine(screenRefrashRate);
             refreshRateObjectsSpeedRatio = DefaultTargetFPS / screenRefrashRate;
         }
 
         public void Run()
         {
             const double oneSecondInMills = 1000.0;
-            const int targetFps = 60;
-            const double MS_PER_UPDATE = oneSecondInMills / targetFps;
+            const double msPerUpdate = oneSecondInMills / DefaultTargetFPS;
             double previous = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             double lag = 0.0;
-
-            Stopwatch stopwatch = new Stopwatch();
 
             while (isRunning)
             {
@@ -81,28 +75,18 @@ namespace Xamarin_Game
                 lag += elapsed;
                 //ProcessInput();
                 int updatesPerRender = 0;
-                while (lag >= MS_PER_UPDATE)
+                while (lag >= msPerUpdate)
                 {
-                    stopwatch.Reset();
-                    stopwatch.Start();
                     Update();
-                    stopwatch.Stop();
-                    Debug.WriteLine($"Update time is {stopwatch.ElapsedMilliseconds} mills");
-                    lag -= MS_PER_UPDATE;
+                    lag -= msPerUpdate;
                     updatesPerRender++;
                 }
-                Debug.WriteLine($"Updates per render: {updatesPerRender}");
-                stopwatch.Reset();
-                stopwatch.Start();
-                Render(lag / MS_PER_UPDATE);
-                stopwatch.Stop();
-                Debug.WriteLine($"Render time is {stopwatch.ElapsedMilliseconds} mills");
+                Render(lag / msPerUpdate);
             }
         }
 
         public void Update()
         {
-            //Thread.Sleep(5);
             List<Bird> birdsToBeRemoved = new List<Bird>();
             List<Stone> stonesToBeRemoved = new List<Stone>();
 
@@ -118,7 +102,6 @@ namespace Xamarin_Game
                         Stone stone = stones.ElementAt(j);
                         if (Rect.Intersects(stone.GetColisionShape(), bird.GetColisionShape()))
                         {
-                            Debug.WriteLine("Intersected");
                             score++;
                             birdsToBeRemoved.Add(bird);
                             stonesToBeRemoved.Add(stone);
@@ -163,14 +146,12 @@ namespace Xamarin_Game
         {
             if (!surfaceHolder.Surface.IsValid)
             {
-                Debug.WriteLine("SurfaceHolderIsInvalid");
                 return;
             }
 
             Canvas canvas = GetCanvas();
 
             RenderObject(canvas, background);
-            //canvas.DrawBitmap(background.Bitmap, background.X, background.Y, null);
 
             for (int i = 0; i < birds.Count; i++)
             {
@@ -179,7 +160,6 @@ namespace Xamarin_Game
             }
 
             RenderObject(canvas, hero);
-            //canvas.DrawBitmap(hero.Bitmap, (float)(hero.X), hero.Y, null);
 
             if (stones.Count > 0)
             {
@@ -189,7 +169,6 @@ namespace Xamarin_Game
                     // Interpolate is used to render object at place where player expects to see object, 
                     // but not, where the object actually is!
                     RenderInterpolatedObject(canvas, stone, interpolate: interpolate);
-                    //canvas.DrawBitmap(stone.Bitmap, (float)(stone.X), (float)(stone.Y - (stone.Speed * interpolate)), null);
                 }
             }
 
@@ -236,16 +215,13 @@ namespace Xamarin_Game
         {
             if (e.ActionMasked == MotionEventActions.Down)
             {
-                Debug.WriteLine("Action Down");
                 if (e.GetX() > 0 & e.GetX() < displayX / 3)
                 {
-                    Debug.WriteLine("Action Down Left 1/3 Screen");
                     hero.IsMoveLeft = true;
                     hero.IsMoveRight = false;
                 }
                 else if (e.GetX() > (displayX / 3 * 2) & e.GetX() < displayX)
                 {
-                    Debug.WriteLine("Action Down Right 1/3 Screen");
                     hero.IsMoveLeft = false;
                     hero.IsMoveRight = true;
                 }
@@ -257,7 +233,6 @@ namespace Xamarin_Game
             }
             else if (e.ActionMasked == MotionEventActions.Up)
             {
-                Debug.WriteLine("Action Up");
                 hero.IsMoveLeft = false;
                 hero.IsMoveRight = false;
             }
