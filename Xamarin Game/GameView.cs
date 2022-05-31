@@ -66,7 +66,7 @@ namespace Xamarin_Game
         public void Run()
         {
             const double oneSecondInMills = 1000.0;
-            const int targetFps = 120;
+            const int targetFps = 60;
             const double MS_PER_UPDATE = oneSecondInMills / targetFps;
             double previous = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             double lag = 0.0;
@@ -167,24 +167,19 @@ namespace Xamarin_Game
                 return;
             }
 
-            Canvas canvas;
-            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
-            {
-                canvas = surfaceHolder.LockHardwareCanvas();
-            }
-            else
-            {
-                canvas = surfaceHolder.LockCanvas();
-            }
-            canvas.DrawBitmap(background.Bitmap, background.X, background.Y, null);
+            Canvas canvas = GetCanvas();
+
+            RenderObject(canvas, background);
+            //canvas.DrawBitmap(background.Bitmap, background.X, background.Y, null);
 
             for (int i = 0; i < birds.Count; i++)
             {
                 Bird bird = birds.ElementAt(i);
-                canvas.DrawBitmap(bird.Bitmap, (float)(bird.X), bird.Y, null);
+                RenderObject(canvas, bird);
             }
 
-            canvas.DrawBitmap(hero.Bitmap, (float)(hero.X), hero.Y, null);
+            RenderObject(canvas, hero);
+            //canvas.DrawBitmap(hero.Bitmap, (float)(hero.X), hero.Y, null);
 
             if (stones.Count > 0)
             {
@@ -193,13 +188,36 @@ namespace Xamarin_Game
                     Stone stone = stones.ElementAt(i);
                     // Interpolate is used to render object at place where player expects to see object, 
                     // but not, where the object actually is!
-                    canvas.DrawBitmap(stone.Bitmap, (float)(stone.X), (float)(stone.Y - (stone.Speed * interpolate)), null);
+                    RenderInterpolatedObject(canvas, stone, interpolate: interpolate);
+                    //canvas.DrawBitmap(stone.Bitmap, (float)(stone.X), (float)(stone.Y - (stone.Speed * interpolate)), null);
                 }
             }
 
             canvas.DrawText(score.ToString(), 5, 35, scorePaint);
 
             surfaceHolder.UnlockCanvasAndPost(canvas);
+        }
+
+        private Canvas GetCanvas()
+        {
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.O)
+            {
+                return surfaceHolder.LockHardwareCanvas();
+            }
+            else
+            {
+                return surfaceHolder.LockCanvas();
+            }
+        }
+
+        private void RenderObject(Canvas canvas, GameObject gameObject, Paint paint = null)
+        {
+            canvas.DrawBitmap(gameObject.Bitmap, (float)gameObject.X, (float)gameObject.Y, paint);
+        }
+
+        private void RenderInterpolatedObject(Canvas canvas, GameObject gameObject, Paint paint = null, double interpolate = 1)
+        {
+            canvas.DrawBitmap(gameObject.Bitmap, (float)(gameObject.X), (float)(gameObject.Y - (gameObject.Speed * interpolate)), paint);
         }
 
         private void GenerateBirds()
