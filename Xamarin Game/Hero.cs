@@ -1,14 +1,10 @@
 ﻿using Android.Content;
 using Android.Graphics;
-using Debug = System.Diagnostics.Debug;
 
 namespace Xamarin_Game
 {
     internal class Hero : GameObject
     {
-        private bool isMoveLeft;
-        private bool isMoveRight;
-
         public Hero(Context context) : base(context)
         {
             Bitmap = BitmapFactory.DecodeResource(context.Resources, Resource.Drawable.slingshot2);
@@ -24,30 +20,25 @@ namespace Xamarin_Game
 
         public override void MoveObject()
         {
-            //Debug.WriteLine("Hero Moved");
-            if (isMoveLeft & !isMoveRight)
+            if (IsMovingLeft & !IsMovingRight)
             {
-                Debug.WriteLine("Hero Moved left");
                 X -= Speed;
                 if (X <= 0)
                 {
-                    Debug.WriteLine("Hero set x = 0");
                     X = 0;
                 }
             }
-            else if (!IsMoveLeft & IsMoveRight)
+            else if (!IsMovingLeft & IsMovingRight)
             {
-                Debug.WriteLine("Hero Moved right");
                 X += Speed;
                 if ((X + Width) > DisplayX)
                 {
-                    Debug.WriteLine("Hero set x = DispalyX - Width");
                     X = DisplayX - Width;
                 }
             }
         }
 
-        public bool IsMoveLeft { get => isMoveLeft; set => isMoveLeft = value; }
-        public bool IsMoveRight { get => isMoveRight; set => isMoveRight = value; }
+        public bool IsMovingLeft { get; set; }
+        public bool IsMovingRight { get; set; }
     }
 }

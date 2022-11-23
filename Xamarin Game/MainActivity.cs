@@ -27,19 +27,13 @@ namespace Xamarin_Game
         protected override void OnResume()
         {
             base.OnResume();
-            if (gameView != null)
-            {
-                gameView.Resume();
-            }
+            gameView?.Resume();
         }
 
         protected override void OnPause()
         {
             base.OnPause();
-            if (gameView != null)
-            {
-                gameView.Pause();
-            }
+            gameView?.Pause();
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

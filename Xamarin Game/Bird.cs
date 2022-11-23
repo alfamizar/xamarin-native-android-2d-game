@@ -6,7 +6,7 @@ namespace Xamarin_Game
 {
     internal class Bird : GameObject
     {
-        private int[] ducksId = { Resource.Drawable.duck0, Resource.Drawable.duck1, Resource.Drawable.duck2, Resource.Drawable.duck3 };
+        private readonly int[] ducksId = { Resource.Drawable.duck0, Resource.Drawable.duck1, Resource.Drawable.duck2, Resource.Drawable.duck3 };
 
         public Bird(Context context, int i) : base(context)
         {

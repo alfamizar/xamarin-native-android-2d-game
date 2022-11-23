@@ -74,12 +74,13 @@ namespace Xamarin_Game
                 previous = current;
                 lag += elapsed;
                 //ProcessInput();
-                int updatesPerRender = 0;
-                while (lag >= msPerUpdate)
+                const int MAX_SKIPPED_FRAMES = 5;
+                int skippedFrames = 0;
+                while (lag >= msPerUpdate && skippedFrames < MAX_SKIPPED_FRAMES)
                 {
                     Update();
                     lag -= msPerUpdate;
-                    updatesPerRender++;
+                    skippedFrames++;
                 }
                 Render(lag / msPerUpdate);
             }
@@ -217,13 +218,13 @@ namespace Xamarin_Game
             {
                 if (e.GetX() > 0 & e.GetX() < displayX / 3)
                 {
-                    hero.IsMoveLeft = true;
-                    hero.IsMoveRight = false;
+                    hero.IsMovingLeft = true;
+                    hero.IsMovingRight = false;
                 }
                 else if (e.GetX() > (displayX / 3 * 2) & e.GetX() < displayX)
                 {
-                    hero.IsMoveLeft = false;
-                    hero.IsMoveRight = true;
+                    hero.IsMovingLeft = false;
+                    hero.IsMovingRight = true;
                 }
                 else
                 {
@@ -233,8 +234,8 @@ namespace Xamarin_Game
             }
             else if (e.ActionMasked == MotionEventActions.Up)
             {
-                hero.IsMoveLeft = false;
-                hero.IsMoveRight = false;
+                hero.IsMovingLeft = false;
+                hero.IsMovingRight = false;
             }
             return true;
         }
